@@ -30,29 +30,35 @@
                 const fetcher = new $rdf.Fetcher(store);
                 const updater = new $rdf.UpdateManager(store);
 
-                // Example SPARQL query
-                const sparqlQuery = `
-                  SELECT ?s ?p ?o WHERE {
-                      ?s ?p ?o.
-                  }
-                `;
+                const dataUrl = "data.ttl"; // Make sure the file is in the same directory
 
-                // fetcher.load("https://kibubu.github.io/test-rdfstore-with-githubpages/data.ttl");
-                fetcher.load("https://kibubu.github.io/test-rdfstore-with-githubpages/data.ttl");
-                // Query the store and populate the table
-                const tableBody = document.getElementById("resultsTable").getElementsByTagName("tbody")[0];
+                // Fetch RDF data from the local URL
+                fetcher
+                    .load(dataUrl)
+                    .then(() => {
+                        const sparqlQuery = `
+                        SELECT ?s ?p ?o WHERE {
+                            ?s ?p ?o.
+                        }
+                    `;
 
-                store.query($rdf.SPARQLToQuery(sparqlQuery, false, store), (result) => {
-                    const row = tableBody.insertRow();
+                        const tableBody = document.getElementById("resultsTable").getElementsByTagName("tbody")[0];
 
-                    const cellSubject = row.insertCell(0);
-                    const cellPredicate = row.insertCell(1);
-                    const cellObject = row.insertCell(2);
+                        store.query($rdf.SPARQLToQuery(sparqlQuery, false, store), (result) => {
+                            const row = tableBody.insertRow();
 
-                    cellSubject.textContent = result["?s"].value;
-                    cellPredicate.textContent = result["?p"].value;
-                    cellObject.textContent = result["?o"].value;
-                });
+                            const cellSubject = row.insertCell(0);
+                            const cellPredicate = row.insertCell(1);
+                            const cellObject = row.insertCell(2);
+
+                            cellSubject.textContent = result["?s"].value;
+                            cellPredicate.textContent = result["?p"].value;
+                            cellObject.textContent = result["?o"].value;
+                        });
+                    })
+                    .catch((error) => {
+                        console.error("Failed to load RDF data:", error);
+                    });
             }
         </script>
     </body>
