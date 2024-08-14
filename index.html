@@ -1,27 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>In memory SPARQL served from GitHub Pages</title>
-</head>
-<body>
-    <h1>SPARQL Query Results</h1>
-    <button onclick="uploadFile()">Upload File</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>In memory SPARQL served from GitHub Pages</title>
+    </head>
+    <body>
+        <h1>SPARQL Query Results</h1>
+        <button onclick="fill_table()">Fill Table</button>
 
-    <!-- Placeholder for the table -->
-    <table id="resultsTable" border="1">
-        <thead>
-            <tr>
-                <th>Subject</th>
-                <th>Predicate</th>
-                <th>Object</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be dynamically added here -->
-        </tbody>
-    </table>
-    <script src="https://cdn.jsdelivr.net/npm/rdflib@2.2.3/dist/rdflib.min.js"></script>
-</body>
+        <!-- Placeholder for the table -->
+        <table id="resultsTable" border="1">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Predicate</th>
+                    <th>Object</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+
+        <script src="https://cdn.jsdelivr.net/npm/rdflib@2.2.3/dist/rdflib.min.js"></script>
+        <script>
+            function fill_table() {
+                const store = $rdf.graph();
+                const fetcher = new $rdf.Fetcher(store);
+                const updater = new $rdf.UpdateManager(store);
+
+                // Example SPARQL query
+                const sparqlQuery = `
+                  SELECT ?s ?p ?o WHERE {
+                      ?s ?p ?o.
+                  }
+                `;
+
+                // fetcher.load("https://kibubu.github.io/test-rdfstore-with-githubpages/data.ttl");
+                fetcher.load("https://kibubu.github.io/test-rdfstore-with-githubpages/data.ttl");
+                // Query the store and populate the table
+                const tableBody = document.getElementById("resultsTable").getElementsByTagName("tbody")[0];
+
+                store.query($rdf.SPARQLToQuery(sparqlQuery, false, store), (result) => {
+                    const row = tableBody.insertRow();
+
+                    const cellSubject = row.insertCell(0);
+                    const cellPredicate = row.insertCell(1);
+                    const cellObject = row.insertCell(2);
+
+                    cellSubject.textContent = result["?s"].value;
+                    cellPredicate.textContent = result["?p"].value;
+                    cellObject.textContent = result["?o"].value;
+                });
+            }
+        </script>
+    </body>
 </html>
